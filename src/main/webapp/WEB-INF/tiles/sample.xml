@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd" >
+<tiles-definitions>
+
+	<!-- name : lvn이어야 한다. -->
+  <definition name="index" template="/WEB-INF/layouts/dummyLayout.jsp">
+  	<put-attribute name="contentPage" value="/WEB-INF/views/index.jsp" />
+  </definition>
+  
+  <definition name="tiles:*/*" template="/WEB-INF/layouts/dummyLayout.jsp">
+  	<put-attribute name="contentPage" value="/WEB-INF/views/{1}/{2}.jsp" />
+  </definition>
+  
+  <definition name="tiles:*/*/*" template="/WEB-INF/layouts/dummyLayout.jsp">
+  	<put-attribute name="contentPage" value="/WEB-INF/views/{1}/{2}/{3}.jsp" />
+  </definition>
+</tiles-definitions>

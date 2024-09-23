@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- [logging 기본 구성] -->
+<!-- 1. logging messages를 결정한다. -->
+
+<!-- 2. appender 를 결정한다. -->
+
+<!--    -> appender  -->
+<!--    		1) 로그 메시지 출력 위치를 의미한다. -->
+<!--    		2) console, file, rolling file, database, server -->
+
+<!-- 3. pattern 을 결정한다. -->
+<!-- 	-> pattern -->
+<!-- 		1) 로그 메시지 출력형식을 결정한다.  -->
+<!-- 		2) patternLayout 부분확인. -->
+<!-- 		3) 예시) %logger{1.} -->
+
+<!-- 4. level 을 설정한다. -->
+<!-- 	-> level -->
+<!-- 		1) 로그 메시지 출력 여부를 결정하는 조건으로 사용한다. -->
+<!-- 		2) trace, debug, info, warn, error, fatal (심감한 로그 순) -->
+<!-- 		   (굳이 확인 필요 없음) -> (꼭 확인해야 함.) -->
+<!-- 		   trace : 모든 레벨 출력 -->
+<!-- 		   fatal : fatal만 출력  -->
+<!-- 		3) 보통 error로 최대한 높여 놓는다. -->
+<!-- 		   그리고 구체적으로 설정해나간다. -->
+<!-- 		   테스트하기 위해선 TRACE로 설정함. -->
+<!-- 		4) 특정 로거에 레벨이 설정되어 있으면, 해당 레벨 이상의 로그메시지만 출력한다. -->
+<!-- 		5) 특정 로거에 레벨이 설정되어 있지 않으면, 해당 레벨은 Root 로거를 따라간다. -->
+
+<!-- 5. logger 를 지정한다. -->
+<!-- 	-> logger -->
+<!-- 		1) 로그 메시지를 기록하는 친구 (로그 메시지 기록자) -->
+<!-- 		2) 필요하다면 상황에 따려 여러개를 등록할 수 있다. -->
+		
+
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{1.} - %msg%n"/>
+    </Console>
+    <Console name="MyConsole" target="SYSTEM_OUT">
+      <PatternLayout pattern="%-5level %logger{1.} =%n %msg%n======================================%n"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+  
+  	<!-- 스프링 로거  -->
+  	<Logger name="org.springframework" level="info" />
+  	<Logger name="org.springframework.web" level="debug" />
+  	<Logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" level="trace" />
+  	
+  	
+  	<logger name="kr.or.ddit" level="info" additivity="false">
+  		<AppenderRef ref="MyConsole"/>
+  	</logger>
+  	
+<!--   	<logger name="kr.or.ddit.jdbcboard.dao.JdbcBoardDAO.selectJdbcBoard" level="debug" /> -->
+<!--   	<logger name="kr.or.ddit.jdbcboard.dao.JdbcBoardDAO.insertJdbcBoard" level="debug" /> -->
+
+  	
+  	<!-- log4jdbc 형태로 로그를 출력한다. -->
+  	<logger name="jdbc.sqltiming" level="debug"/>
+  	<logger name="jdbc.resultsettable" level="debug"/> 
+  	
+  	
+    <Root level="error">
+      <AppenderRef ref="Console"/>
+    </Root>
+  </Loggers>
+</Configuration>

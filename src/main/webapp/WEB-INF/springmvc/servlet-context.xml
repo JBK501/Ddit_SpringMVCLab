@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+
+	<!-- JSON 시간 데이터 처리하는 설정 -->
+	<bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean" 
+		  id="jackson2ObjectMapper">
+		<property name="featuresToDisable">
+			<array>
+				<util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS"/>
+			</array>
+		</property>
+	</bean>
+
+
+	<!-- 정적자원 관리 방식 1 -->
+	<!-- 정적 자원 처리를 위한 설정(html로 실행가능) -->
+	<!-- 정적 자원 요청을 WAS 가 가진 DefaultServlet 에게 위임한다. -->
+	<!-- 스프링에서 권유하는 방식이 아님 -->
+<!-- 	<mvc:default-servlet-handler/> -->
+
+
+	<!-- 정적자원 관리 방식 2 -->
+	<!-- 정적자원을 일괄 관리할 수 있는 설정 -->
+	<!-- {/**} resources 아래에 depth가 몇단계로 들어가던 상관없다. -->
+	<!-- 해당 와일드 카드 이후 경로가 resource 다음에 그대로 붙는다. -->
+	<!-- cache-period -->
+	<mvc:resources location="/resources/" mapping="/resources/**" cache-period="0"></mvc:resources>	
+		
+	
+	<!-- 동적 자원 관리 -->
+	<!-- HandlerMapping, HandleAdapter, ViewResolver 를 비롯한
+	     spring webmvc 의 핵심 전략 객체들이 자동으로 빈 등록된다. -->
+	<!-- 쉽게 말해 @Controller / @RequesetMapping 을 tracing 할 수 있도록 구조를 만든다. -->
+	<mvc:annotation-driven></mvc:annotation-driven>
+	
+	
+	<!-- 컴포넌트 스캔 설정 -->
+	<!-- use-default-filters 스프링 빈등록 해제 -->
+	<!-- context:include-filter로 @Controller만 하위 컨테이너에 등록한다. -->
+	<context:component-scan base-package="kr.or.ddit" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+	
+	
+	<!-- 동적 자원 관리중, View에 대한 정보 -->
+	<!-- {mvc:jsp} jsp prefix와 suffix 설정 -->
+	<!-- 컨트롤러에서 지정한 lvn에 prefix와 suffix를 붙여준다. -->
+	<!-- {mvc:tiles} 
+		 1. 우선순위가 존재한다.-->
+	<!-- 타일즈를 지정하려면
+		 {mvc:tiles-configurer}를 먼저 지정해야 한다. 
+		 {mvc:tiles-configurer}는 타일즈 설정파일 위치를 결정한다.
+	-->
+	<mvc:tiles-configurer>
+		<mvc:definitions location="/WEB-INF/tiles/*.xml"/>
+	</mvc:tiles-configurer>
+	
+	<!-- 파일 다운로드 처리를 위한 VIEW -->
+	<!-- 
+		id값 : Controller에서 lvn으로 반환하는 값과 일치함.
+	 -->
+	<bean class="kr.or.ddit.case10.view.DownloadView" id="downloadView"></bean>
+	
+	
+	<mvc:view-resolvers>
+		<!-- accept 헤더를 기반으로 컨텐즈 종류를 협상한다. (순서가 가장 첫번째여야 한다.) -->
+		<mvc:content-negotiation>
+			<mvc:default-views>
+				<bean id="jsonView" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"
+					p:objectMapper-ref="jackson2ObjectMapper"
+				/>
+			</mvc:default-views>
+		</mvc:content-negotiation>
+		
+		<!-- 파일 다운로드 처리 빈과 연결함 -->
+		<mvc:bean-name />
+		
+		<!-- tiles view -->
+		<mvc:tiles/>
+		<!-- jsp view (순서가 가장 마지막이어야 한다.) -->
+		<mvc:jsp prefix="/WEB-INF/views/" suffix=".jsp"/>
+	</mvc:view-resolvers>
+	
+	
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+	
+</beans>
